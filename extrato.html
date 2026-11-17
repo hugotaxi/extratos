@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f1f5f9" id="meta-theme-color">
+    <title>Extrato de Corridas • Hugo Táxi</title>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Biblioteca para gerar QR Code localmente -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <script>
+        (function() {
+            var tema = localStorage.getItem('tema_sistema_taxi') || 'light';
+            document.documentElement.setAttribute('data-theme', tema);
+        })();
+    </script>
+
+    <style>
+        :root {
+            --bg-body: #f1f5f9;
+            --bg-header: rgba(255, 255, 255, 0.92);
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --accent-green: #059669;
+            --accent-green-light: rgba(5, 150, 105, 0.12);
+            --accent-blue: #2563eb;
+            --accent-orange: #ea580c;
+            --border-color: rgba(15, 23, 42, 0.08);
+            --card-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #0f172a;
+            --bg-header: rgba(15, 23, 42, 0.88);
+            --bg-card: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-green: #10b981;
+            --accent-green-light: rgba(16, 185, 129, 0.15);
+            --accent-blue: #3b82f6;
+            --accent-orange: #fb923c;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --card-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            transition: background-color 0.25s ease, color 0.25s ease;
+        }
+
+        /* Header Fixo */
+        .app-header {
+            background: var(--bg-header);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 14px 16px;
+        }
+
+        .header-inner {
+            max-width: 560px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .btn-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-icon:active {
+            transform: scale(0.94);
+        }
+
+        /* Container Principal */
+        .main-wrapper {
+            max-width: 560px;
+            margin: 0 auto;
+            padding: 16px 16px 40px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Card Resumo Financeiro + Botão PIX */
+        .summary-hero {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            border-radius: 22px;
+            padding: 20px;
+            color: #ffffff;
+            box-shadow: 0 12px 28px rgba(5, 150, 105, 0.25);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .summary-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .client-badge {
+            background: rgba(255, 255, 255, 0.18);
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .count-badge {
+            font-size: 12px;
+            font-weight: 600;
+            opacity: 0.9;
+        }
+
+        .total-amount {
+            font-size: 30px;
+            font-weight: 800;
+            letter-spacing: -0.6px;
+            margin: 2px 0;
+        }
+
+        .btn-pix-pay {
+            background: #ffffff;
+            color: #047857;
+            border: none;
+            border-radius: 14px;
+            padding: 12px 16px;
+            font-size: 14px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        .btn-pix-pay:hover {
+            transform: translateY(-1px);
+            background: #f8fafc;
+        }
+
+        .btn-pix-pay:active {
+            transform: scale(0.98);
+        }
+
+        /* Seção da Lista */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            padding: 0 4px;
+        }
+
+        #telatodos {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* Card Individual da Corrida */
+        .ride-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 14px 16px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            transition: transform 0.15s ease;
+        }
+
+        .ride-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .ride-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--accent-green-light);
+            color: var(--accent-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .ride-details {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .ride-client {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .ride-info {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 2px;
+            word-break: break-word;
+        }
+
+        .ride-price {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--accent-orange);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .loading-box {
+            text-align: center;
+            padding: 36px 16px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Cabeçalho -->
+    <header class="app-header">
+        <div class="header-inner">
+            <a href="login.html" class="btn-icon" title="Sair / Trocar Conta" onclick="localStorage.removeItem('inicial');">
+                <i class="bi bi-box-arrow-left"></i>
+            </a>
+            <div class="text-center">
+                <div style="font-weight: 800; font-size: 15px;">Hugo Táxi</div>
+                <div style="font-size: 11px; color: var(--text-muted);">Extrato Detalhado</div>
+            </div>
+            <button type="button" class="btn-icon" id="btn-tema-extrato" title="Alternar Tema">
+                <i class="bi bi-moon-stars" id="icone-tema-extrato"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="main-wrapper">
+
+        <!-- Card de Total e Pagamento PIX -->
+        <div class="summary-hero">
+            <div class="summary-top">
+                <span class="client-badge">
+                    <i class="bi bi-person-circle"></i>
+                    <span id="nome-cliente-badge">Cliente</span>
+                </span>
+                <span class="count-badge" id="lbadicional">Anotações (0)</span>
+            </div>
+
+            <div>
+                <div style="font-size: 12px; opacity: 0.85; font-weight: 500;">Valor Total em Aberto</div>
+                <div class="total-amount" id="lbtotal">Total R$ 0.00</div>
+            </div>
+
+            <button type="button" class="btn-pix-pay" id="btn-pagar-pix">
+                <i class="bi bi-qr-code-scan fs-5"></i>
+                <span>Pagar via PIX Agora</span>
+            </button>
+        </div>
+
+        <!-- Título da Lista -->
+        <div class="section-header">
+            <span>Histórico de Corridas</span>
+            <i class="bi bi-receipt"></i>
+        </div>
+
+        <!-- Loader -->
+        <div id="loading-spinner" class="loading-box">
+            <div class="spinner-border spinner-border-sm text-success me-2" role="status"></div>
+            Carregando suas corridas...
+        </div>
+
+        <!-- Container dos Cards -->
+        <div id="telatodos"></div>
+
+    </main>
+
+    <script>
+        var bb_baserow_token = 'IKrER8jZ6NQENRIxVlNeF65L5J3ss1LH';
+        var bb_baserow_url = 'https://api.baserow.io/';
+
+        var tabelaidlogin = '177839';
+        var tabelaidloginsenha = '1188493';
+        var tabelaidcorridas = '177840';
+        var tabelaidcorridacliente = '1188495';
+
+        var id200 = [];
+        var nomescli200 = [];
+        var valor200 = [];
+        var informacao200 = [];
+        var numero_whatsapp = '5577988331234';
+        var chave_pix = 'e181ddbf-ada2-4302-a9e0-131a6f2875e4';
+        var nome_recebedor_pix = 'Victor Hugo';
+        var cidade_recebedor_pix = 'taxicandeias';
+
+        var somadesaldo = 0;
+        var todosvalores = [];
+        var id = 0;
+        var resultado_pesquisa = [];
+        var usuarionome = localStorage.getItem('usuarioindentificado') || 'Erro';
+
+        document.getElementById('nome-cliente-badge').textContent = usuarionome;
+
+        // Controle de Tema
+        function aplicarTemaExtrato(tema) {
+            const icone = document.getElementById('icone-tema-extrato');
+            const meta = document.getElementById('meta-theme-color');
+            if (tema === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                icone.className = 'bi bi-sun-fill text-warning';
+                meta.setAttribute('content', '#0f172a');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                icone.className = 'bi bi-moon-stars';
+                meta.setAttribute('content', '#f1f5f9');
+            }
+        }
+
+        aplicarTemaExtrato(localStorage.getItem('tema_sistema_taxi') || 'light');
+
+        document.getElementById('btn-tema-extrato').addEventListener('click', function () {
+            const atual = document.documentElement.getAttribute('data-theme') || 'light';
+            const proximo = atual === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('tema_sistema_taxi', proximo);
+            localStorage.setItem('taxi_vca_tema_v1', proximo);
+            aplicarTemaExtrato(proximo);
+        });
+
+        function txt_to_number(txt) {
+            txt = txt + "";
+            if (txt.includes(",")) {
+                txt = txt.replace(",", ".");
+            }
+            if (txt.includes(".")) {
+                txt = parseFloat(txt);
+            } else {
+                txt = parseInt(txt);
+            }
+            return isNaN(txt) ? 0 : txt;
+        }
+
+        function format_decimal_number(number, places, virgula = false) {
+            number = number + "";
+            if (number.includes(",")) {
+                number = number.replace(",", ".");
+                number = parseFloat(number);
+            } else {
+                number = parseFloat(number);
+            }
+            number = (isNaN(number) ? 0 : number).toFixed(places);
+            if (virgula) {
+                number = number.replace(".", ",");
+            }
+            return number;
+        }
+
+        function renderCardHTML(cliente, valor, info) {
+            const valorFormatado = format_decimal_number(txt_to_number(valor), 2, true);
+            return `
+                <div class="ride-card">
+                    <div class="ride-left">
+                        <div class="ride-icon">
+                            <i class="bi bi-taxi-front-fill"></i>
+                        </div>
+                        <div class="ride-details">
+                            <span class="ride-client">${cliente}</span>
+                            <span class="ride-info">${info || 'Corrida registrada'}</span>
+                        </div>
+                    </div>
+                    <div class="ride-price">R$ ${valorFormatado}</div>
+                </div>
+            `;
+        }
+
+        function callnome() {
+            fetch(bb_baserow_url + "api/database/rows/table/" + tabelaidcorridas + "/?user_field_names=true&filter__field_" + tabelaidcorridacliente + "__equal=" + encodeURIComponent(usuarionome) + "&order_by=+cliente&page=1", {
+                method: "GET",
+                headers: {
+                    "Authorization": "Token " + bb_baserow_token
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loading-spinner').style.display = 'none';
+                resultado_pesquisa = data.results || [];
+                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+                if (!resultado_pesquisa.length) {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Nenhuma corrida em aberto',
+                        text: 'Não há registros pendentes para ' + usuarionome + '.',
+                        background: isDark ? '#1e293b' : '#ffffff',
+                        color: isDark ? '#f8fafc' : '#0f172a'
+                    });
+                } else {
+                    id = resultado_pesquisa.length;
+                    if (id > 99) {
+                        pagina2();
+                    } else {
+                        pagina1();
+                    }
+                }
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+                document.getElementById('loading-spinner').innerHTML = '<span class="text-danger">Erro ao carregar corridas.</span>';
+            });
+        }
+
+        function pagina1() {
+            id = 0;
+            const listaInvertida = [...resultado_pesquisa].reverse();
+            let html = '';
+            for (let i = 0; i < listaInvertida.length; i++) {
+                const Item = listaInvertida[i];
+                id++;
+                html += renderCardHTML(Item['cliente'], Item['valor'], Item['informacao']);
+                todosvalores.push(Item['valor']);
+            }
+            document.getElementById("telatodos").innerHTML = html;
+
+            for (let j = 0; j < todosvalores.length; j++) {
+                somadesaldo = txt_to_number(somadesaldo) + txt_to_number(todosvalores[j]);
+            }
+            calculos();
+        }
+
+        function pagina2() {
+            const listaInvertida = [...resultado_pesquisa].reverse();
+            for (let i = 0; i < listaInvertida.length; i++) {
+                const Item = listaInvertida[i];
+                id200.push(Item['id']);
+                nomescli200.push(Item['cliente']);
+                valor200.push(Item['valor']);
+                informacao200.push(Item['informacao']);
+            }
+
+            fetch(bb_baserow_url + "api/database/rows/table/" + tabelaidcorridas + "/?user_field_names=true&filter__field_" + tabelaidcorridacliente + "__equal=" + encodeURIComponent(usuarionome) + "&order_by=+cliente&page=2", {
+                method: "GET",
+                headers: {
+                    "Authorization": "Token " + bb_baserow_token
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const res2 = data.results || [];
+                for (let i = 0; i < res2.length; i++) {
+                    const Item = res2[i];
+                    id200.push(Item['id']);
+                    nomescli200.push(Item['cliente']);
+                    valor200.push(Item['valor']);
+                    informacao200.push(Item['informacao']);
+                }
+                chamarlista();
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+                chamarlista();
+            });
+        }
+
+        function chamarlista() {
+            id = 0;
+            let html = '';
+            for (let i = 0; i < nomescli200.length; i++) {
+                id++;
+                const idx = nomescli200.length - id;
+                const valAtual = valor200[idx];
+                const infoAtual = informacao200[idx];
+                html += renderCardHTML(nomescli200[i], valAtual, infoAtual);
+                todosvalores.push(valAtual);
+            }
+            document.getElementById("telatodos").innerHTML = html;
+
+            for (let j = 0; j < todosvalores.length; j++) {
+                somadesaldo = txt_to_number(somadesaldo) + txt_to_number(todosvalores[j]);
+            }
+            calculos();
+        }
+
+        function calculos() {
+            document.getElementById("lbtotal").textContent = 'Total R$ ' + format_decimal_number(somadesaldo, 2, true);
+            document.getElementById("lbadicional").textContent = 'Anotações (' + id + ')';
+        }
+
+        // --- FUNÇÕES DE GERAÇÃO DO PIX (PADRÃO EMV / BANCO CENTRAL) ---
+
+        function formatFieldPix(id, value) {
+            const len = value.length.toString().padStart(2, '0');
+            return id + len + value;
+        }
+
+        function calcularCRC16(payload) {
+            let polinomio = 0x1021;
+            let resultado = 0xFFFF;
+            
+            for (let i = 0; i < payload.length; i++) {
+                let c = payload.charCodeAt(i);
+                resultado ^= (c << 8);
+                for (let bit = 0; bit < 8; bit++) {
+                    if ((resultado & 0x8000) !== 0) {
+                        resultado = ((resultado << 1) ^ polinomio) & 0xFFFF;
+                    } else {
+                        resultado = ((resultado << 1) & 0xFFFF;
+                    }
+                }
+            }
+            return resultado.toString(16).toUpperCase().padStart(4, '0');
+        }
+
+        function calcularPayloadPix(chavePix, valor, nomeRecebedor, cidadeRecebedor, identificador) {
+            const payloadFormatIndicator = formatFieldPix('00', '01');
+            const merchantAccountInformationGui = formatFieldPix('00', 'br.gov.bcb.pix');
+            const merchantAccountInformationKey = formatFieldPix('01', chavePix);
+            const merchantAccountInformation = formatFieldPix('26', merchantAccountInformationGui + merchantAccountInformationKey);
+            
+            const merchantCategoryCode = formatFieldPix('52', '0000');
+            const transactionCurrency = formatFieldPix('53', '986'); // BRL
+            const transactionAmount = formatFieldPix('54', Number(valor).toFixed(2));
+            const countryCode = formatFieldPix('58', 'BR');
+            const merchantName = formatFieldPix('59', nomeRecebedor.substring(0, 25));
+            const merchantCity = formatFieldPix('60', cidadeRecebedor.substring(0, 15));
+            
+            const additionalDataFieldTemplateTxId = formatFieldPix('05', identificador.substring(0, 25));
+            const additionalDataFieldTemplate = formatFieldPix('62', additionalDataFieldTemplateTxId);
+
+            let payload = payloadFormatIndicator +
+                          merchantAccountInformation +
+                          merchantCategoryCode +
+                          transactionCurrency +
+                          transactionAmount +
+                          countryCode +
+                          merchantName +
+                          merchantCity +
+                          additionalDataFieldTemplate +
+                          '6304';
+
+            payload += calcularCRC16(payload);
+            return payload;
+        }
+
+        function callpix() {
+            let valorNumerico = txt_to_number(somadesaldo);
+            
+            if (valorNumerico <= 0) {
+                Swal.fire('Atenção', 'O valor total em aberto está zerado.', 'warning');
+                return;
+            }
+
+            let valor_pix_str = format_decimal_number(valorNumerico, 2, false);
+            let payloadPix = calcularPayloadPix(chave_pix, valor_pix_str, nome_recebedor_pix, cidade_recebedor_pix, 'HUGO_TAXI_' + usuarionome);
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+            Swal.fire({
+                title: 'Pagar com Pix',
+                html: `
+                    <div style="font-size: 13.5px; margin-bottom: 8px; color: var(--text-muted);">
+                        Escaneie o QR Code abaixo com o aplicativo do seu banco ou copie o código Pix.
+                    </div>
+                    <div id="qrcode-container" style="display: flex; justify-content: center; margin: 12px 0; background: #ffffff; padding: 12px; border-radius: 12px;"></div>
+                    <div class="input-group mb-2">
+                        <input type="text" id="pix-copia-cola" class="form-control form-control-sm" value="${payloadPix}" readonly>
+                        <button class="btn btn-success btn-sm" type="button" id="btn-copiar" style="font-weight: 600;">
+                            <i class="bi bi-clipboard"></i> Copiar
+                        </button>
+                    </div>
+                `,
+                showConfirmButton: true,
+                confirmButtonText: 'Fechar',
+                confirmButtonColor: '#059669',
+                background: isDark ? '#1e293b' : '#ffffff',
+                color: isDark ? '#f8fafc' : '#0f172a',
+                didOpen: () => {
+                    // Desenha o QR Code na div
+                    new QRCode(document.getElementById("qrcode-container"), {
+                        text: payloadPix,
+                        width: 190,
+                        height: 190,
+                        colorDark: "#000000",
+                        colorLight: "#ffffff",
+                        correctLevel: QRCode.CorrectLevel.M
+                    });
+
+                    // Evento do botão Copiar
+                    document.getElementById('btn-copiar').addEventListener('click', function() {
+                        const inputCopia = document.getElementById('pix-copia-cola');
+                        inputCopia.select();
+                        inputCopia.setSelectionRange(0, 99999);
+                        navigator.clipboard.writeText(inputCopia.value);
+                        
+                        Swal.mixin({
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 2000,
+                            timerProgressBar: true
+                        }).fire({
+                            icon: 'success',
+                            title: 'Código Pix copiado!'
+                        });
+                    });
+                }
+            });
+        }
+
+        document.getElementById('btn-pagar-pix').addEventListener('click', callpix);
+        document.getElementById('lbtotal').addEventListener('click', callpix);
+
+        callnome();
+    </script>
+</body>
+</html>
