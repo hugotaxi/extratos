@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0f172a" id="meta-theme-color">
+    <title>Hugo Táxi • Extrato do Cliente</title>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <script>
+        (function() {
+            var tema = localStorage.getItem('tema_sistema_taxi') || 'light';
+            document.documentElement.setAttribute('data-theme', tema);
+        })();
+    </script>
+
+    <style>
+        :root {
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --accent-yellow: #f59e0b;
+            --accent-blue: #2563eb;
+            --border-color: rgba(15, 23, 42, 0.08);
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-yellow: #fbbf24;
+            --accent-blue: #3b82f6;
+            --border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .splash-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 36px 28px;
+            max-width: 360px;
+            width: 90%;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 28px;
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.12);
+            animation: fadeUp 0.6s ease-out forwards;
+        }
+
+        .logo-wrapper {
+            width: 120px;
+            height: 120px;
+            border-radius: 28px;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(37, 99, 235, 0.12));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            position: relative;
+            animation: pulseLogo 1.8s infinite ease-in-out;
+        }
+
+        .logo-wrapper img {
+            width: 88px;
+            height: 88px;
+            object-fit: contain;
+            border-radius: 18px;
+        }
+
+        .logo-fallback {
+            font-size: 46px;
+            color: var(--accent-yellow);
+            display: none;
+        }
+
+        .brand-title {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin: 0 0 6px 0;
+        }
+
+        .brand-subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin: 0 0 24px 0;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(148, 163, 184, 0.2);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent-yellow), var(--accent-blue));
+            border-radius: 999px;
+            animation: loadProgress 1.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes pulseLogo {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes loadProgress {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="splash-card">
+        <div class="logo-wrapper">
+            <img id="image_1" src="assets/logo2.png" alt="Hugo Táxi" onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='block';">
+            <i class="bi bi-taxi-front-fill logo-fallback" id="logo-fallback"></i>
+        </div>
+        <h1 class="brand-title">Hugo Táxi</h1>
+        <p class="brand-subtitle">Preparando seu extrato de corridas...</p>
+        <div class="progress-bar-container">
+            <div class="progress-bar-fill"></div>
+        </div>
+    </div>
+
+    <script>
+        function getParameters() {
+            let url = window.location.href;
+            let parametros = url.split("?");
+            let retorno = [];
+            if (parametros.length > 1) {
+                parametros = parametros[1].split("&");
+                for (let i = 0; i < parametros.length; i++) {
+                    let parametro = parametros[i].split("=");
+                    retorno[parametro[0]] = parametro[1];
+                }
+            }
+            return retorno;
+        }
+
+        function abrir_tela() {
+            const idParam = getParameters()['id'];
+            localStorage.setItem('inicial', idParam === undefined ? "" : decodeURIComponent(idParam));
+            clearInterval(timer);
+            window.location.href = "login.html";
+        }
+
+        if ((localStorage.getItem('tema_sistema_taxi') || 'light') === 'dark') {
+            document.getElementById('meta-theme-color').setAttribute('content', '#0f172a');
+        } else {
+            document.getElementById('meta-theme-color').setAttribute('content', '#f8fafc');
+        }
+
+        var timer = setInterval(abrir_tela, 1800);
+    </script>
+</body>
+</html>
